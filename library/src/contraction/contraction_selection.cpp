@@ -41,7 +41,6 @@
 namespace hiptensor
 {
     hiptensorStatus_t bruteForceModel(ContractionSolution**                    winner,
-                                      PerfMetrics*                             winnerMetrics,
                                       std::vector<ContractionSolution*> const& candidates,
                                       hipDataType                              typeA,
                                       std::vector<std::size_t> const&          a_ms_ks_lengths,
@@ -139,7 +138,7 @@ namespace hiptensor
         CHECK_HIP_ALLOC(hipFree(E_d));
         CHECK_HIP_ALLOC(hipFree(wspace));
 
-        *winnerMetrics = bestMetrics;
+        bestSolution->setMetrics(bestMetrics);
         *winner = bestSolution;
 
         if(bestSolution == nullptr)
@@ -157,7 +156,6 @@ namespace hiptensor
     {
         static hiptensorStatus_t
             selectWinner(ContractionSolution**                                   winner,
-                         PerfMetrics*                                            winnerMetrics,
                          std::unordered_map<size_t, ContractionSolution*> const& candidates,
                          hipDataType                                             typeA,
                          std::vector<std::size_t> const&                         a_ms_ks_lengths,
@@ -182,7 +180,6 @@ namespace hiptensor
     {
         static hiptensorStatus_t
             selectWinner(ContractionSolution**                                   winner,
-                         PerfMetrics*                                            winnerMetrics,
                          std::unordered_map<size_t, ContractionSolution*> const& candidates,
                          hipDataType                                             typeA,
                          std::vector<std::size_t> const&                         a_ms_ks_lengths,
@@ -469,7 +466,6 @@ namespace hiptensor
     {
         static hiptensorStatus_t
             selectWinner(ContractionSolution**                                   winner,
-                         PerfMetrics*                                            winnerMetrics,
                          std::unordered_map<size_t, ContractionSolution*> const& candidates,
                          hipDataType                                             typeA,
                          std::vector<std::size_t> const&                         a_ms_ks_lengths,
@@ -494,7 +490,6 @@ namespace hiptensor
     {
         static hiptensorStatus_t
             selectWinner(ContractionSolution**                                   winner,
-                         PerfMetrics*                                            winnerMetrics,
                          std::unordered_map<size_t, ContractionSolution*> const& candidates,
                          hipDataType                                             typeA,
                          std::vector<std::size_t> const&                         a_ms_ks_lengths,
@@ -767,7 +762,6 @@ namespace hiptensor
 
     hiptensorStatus_t
         actorCriticModel(ContractionSolution**                                   winner,
-                         PerfMetrics*                                            winnerMetrics,
                          std::unordered_map<size_t, ContractionSolution*> const& candidates,
                          hipDataType                                             typeA,
                          std::vector<std::size_t> const&                         a_ms_ks_lengths,
@@ -787,7 +781,6 @@ namespace hiptensor
         {
             return ActorCriticSelection<float, float, float, float, ContractionOpId_t::SCALE>::
                 selectWinner(winner,
-                             winnerMetrics,
                              candidates,
                              typeA,
                              a_ms_ks_lengths,
@@ -808,7 +801,6 @@ namespace hiptensor
         {
             return ActorCriticSelection<float, float, float, float, ContractionOpId_t::BILINEAR>::
                 selectWinner(winner,
-                             winnerMetrics,
                              candidates,
                              typeA,
                              a_ms_ks_lengths,
@@ -829,7 +821,6 @@ namespace hiptensor
         {
             return ActorCriticSelection<double, double, double, double, ContractionOpId_t::SCALE>::
                 selectWinner(winner,
-                             winnerMetrics,
                              candidates,
                              typeA,
                              a_ms_ks_lengths,
@@ -853,7 +844,6 @@ namespace hiptensor
                                         double,
                                         double,
                                         ContractionOpId_t::BILINEAR>::selectWinner(winner,
-                                                                                   winnerMetrics,
                                                                                    candidates,
                                                                                    typeA,
                                                                                    a_ms_ks_lengths,

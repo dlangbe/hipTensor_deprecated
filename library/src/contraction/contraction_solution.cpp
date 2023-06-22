@@ -185,7 +185,11 @@ namespace hiptensor
 
     void ContractionSolution::setMetrics(PerfMetrics metrics)
     {
-        mPerfMetrics = metrics;
+        mPerfMetrics.mKernelUid = metrics.mKernelUid;
+        mPerfMetrics.mKernelName = metrics.mKernelName;
+        mPerfMetrics.mAvgTimeMs = metrics.mAvgTimeMs;
+        mPerfMetrics.mTflops = metrics.mTflops;
+        mPerfMetrics.mBandwidth = metrics.mBandwidth;
     }
 
     PerfMetrics ContractionSolution::perfMetrics()
@@ -202,6 +206,12 @@ namespace hiptensor
 
         mArgPtr.reset(nullptr);
         mInvokerPtr.reset(nullptr);
+
+        mPerfMetrics.mKernelUid = 0;
+        mPerfMetrics.mKernelName = "";
+        mPerfMetrics.mAvgTimeMs = 0;
+        mPerfMetrics.mTflops = 0;
+        mPerfMetrics.mBandwidth = 0;
 
         mValid = false;
     }

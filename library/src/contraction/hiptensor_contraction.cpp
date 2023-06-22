@@ -455,13 +455,11 @@ hiptensorStatus_t hiptensorInitContractionPlan(const hiptensorHandle_t*         
 
     // Launch selection algorithm
     hiptensor::ContractionSolution* winner = nullptr;
-    hiptensor::PerfMetrics          winnerMetrics;
     auto                            result = HIPTENSOR_STATUS_INTERNAL_ERROR;
     if(find->mSelectionAlgorithm == HIPTENSOR_ALGO_DEFAULT
        || find->mSelectionAlgorithm == HIPTENSOR_ALGO_DEFAULT_PATIENT)
     {
         result = hiptensor::bruteForceModel(&winner,
-                                            &winnerMetrics,
                                             candidates,
                                             ADataType,
                                             desc->mTensorDesc[0].mLengths,
@@ -480,7 +478,6 @@ hiptensorStatus_t hiptensorInitContractionPlan(const hiptensorHandle_t*         
     else if(find->mSelectionAlgorithm == HIPTENSOR_ALGO_ACTOR_CRITIC)
     {
         result = hiptensor::actorCriticModel(&winner,
-                                             &winnerMetrics,
                                              solutionQ.solutions(),
                                              ADataType,
                                              desc->mTensorDesc[0].mLengths,
@@ -504,18 +501,18 @@ hiptensorStatus_t hiptensorInitContractionPlan(const hiptensorHandle_t*         
         return result;
     }
 
+    // Assign the contraction descriptor
+    plan->mContractionDesc = *desc;
+    plan->mSolution        = winner;
+
+    auto metrics = winner->perfMetrics();
+
     sprintf(msg,
             "Algo: %d KernelId: %lu KernelName: %s",
             find->mSelectionAlgorithm,
-            winnerMetrics.mKernelUid,
-            winnerMetrics.mKernelName.c_str());
+            metrics.mKernelUid,
+            metrics.mKernelName.c_str());
     logger->logPerformanceTrace("hiptensorInitContractionPlan", msg);
-
-    // Assign the contraction descriptor
-    plan->mContractionDesc = *desc;
-
-    winner->setMetrics(winnerMetrics);
-    plan->mSolution        = winner;
 
     return HIPTENSOR_STATUS_SUCCESS;
 }
