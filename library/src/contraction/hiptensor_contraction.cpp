@@ -32,7 +32,7 @@
 #include "handle.hpp"
 #include "hip_device.hpp"
 #include "logger.hpp"
-#include "performance.hpp"
+
 
 // Convert between vectors of void ptrs stored in opaque API objects
 // to vectors of ContractionSolution ptrs with simple cast.
@@ -505,17 +505,16 @@ hiptensorStatus_t hiptensorInitContractionPlan(const hiptensorHandle_t*         
     }
 
     sprintf(msg,
-            "Algo: %d KernelId: %lu KernelName: %s %0.3f ms, %0.3f TFlops, %0.3f GB/s",
+            "Algo: %d KernelId: %lu KernelName: %s",
             find->mSelectionAlgorithm,
             winnerMetrics.mKernelUid,
-            winnerMetrics.mKernelName.c_str(),
-            winnerMetrics.mAvgTimeMs,
-            winnerMetrics.mTflops,
-            winnerMetrics.mBandwidth);
+            winnerMetrics.mKernelName.c_str());
     logger->logPerformanceTrace("hiptensorInitContractionPlan", msg);
 
     // Assign the contraction descriptor
     plan->mContractionDesc = *desc;
+
+    winner->setMetrics(winnerMetrics);
     plan->mSolution        = winner;
 
     return HIPTENSOR_STATUS_SUCCESS;
@@ -704,7 +703,27 @@ hiptensorStatus_t hiptensorContraction(const hiptensorHandle_t*          handle,
             return errorCode;
         }
 
-        (*cSolution)(StreamConfig{stream, false});
+
+        auto time = (*cSolution)(StreamConfig{stream, true});
+
+        int32_t m, n, k;
+        std::tie(m, n, k) = cSolution->problemDims();
+        auto flops        = std::size_t(2) * m * n * k;
+        auto bytes        = cSolution->problemBytes();
+
+        auto metrics = cSolution->perfMetrics();
+        
+        metrics.mAvgTimeMs = time;
+        metrics.mTflops = static_cast<float>(flops) / static_cast<float>(1.E9) / time;
+        metrics.mBandwidth = static_cast<float>(bytes) / static_cast<float>(1.E6) / time;
+
+        // log perf metrics (not name/id)
+        sprintf(msg,
+            " %0.3f ms, %0.3f TFlops, %0.3f GB/s",
+            metrics.mAvgTimeMs,
+            metrics.mTflops,
+            metrics.mBandwidth);
+        logger->logPerformanceTrace("hiptensorInitContractionPlan", msg);
         return HIPTENSOR_STATUS_SUCCESS;
     }
     else

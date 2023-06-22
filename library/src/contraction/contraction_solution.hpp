@@ -40,6 +40,7 @@
 
 #include "contraction_meta_traits.hpp"
 #include "contraction_solution_params.hpp"
+#include "performance.hpp"
 
 namespace hiptensor
 {
@@ -121,6 +122,12 @@ namespace hiptensor
         // Kernel's required workspace size
         size_t workspaceSize() const;
 
+        // Set performance metrics
+        void setMetrics(PerfMetrics metrics);
+
+        // Get performance metrics
+        PerfMetrics perfMetrics();
+
         // Reset all arguments
         void resetArgs();
 
@@ -135,6 +142,9 @@ namespace hiptensor
         std::unique_ptr<ck::tensor_operation::device::BaseOperator> mDeviceOp;
         std::unique_ptr<ck::tensor_operation::device::BaseArgument> mArgPtr;
         std::unique_ptr<ck::tensor_operation::device::BaseInvoker>  mInvokerPtr;
+
+        // Performance metrics
+        PerfMetrics mPerfMetrics;
     };
 
     template <ck::index_t NumDimM,

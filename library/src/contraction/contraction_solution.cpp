@@ -183,6 +183,16 @@ namespace hiptensor
         }
     }
 
+    void ContractionSolution::setMetrics(PerfMetrics metrics)
+    {
+        mPerfMetrics = metrics;
+    }
+
+    PerfMetrics ContractionSolution::perfMetrics()
+    {
+        return mPerfMetrics;
+    }
+
     void ContractionSolution::resetArgs()
     {
         mM     = 0;
